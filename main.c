@@ -33,7 +33,7 @@ int counter = 0;
 char Rows[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80}; // LED Matrix
 char Cols[] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF, 0xDF, 0xBF, 0x7F}; // LED Matrix
 
-enum MENU_STATES { WAIT, BUTPRESS, START, END, RESET } m_state ;
+enum MENU_STATES { WAIT, BUTPRESS, START, END } m_state ;
 enum LED_STATES { WAITBUT,RELBUT, INIT, ONE, TWO, THREE, FOUR, FIN } state;
 
 void menu_tick() {
@@ -51,12 +51,12 @@ void menu_tick() {
             m_state = START;
          }
          else {
-            m_state = WAIT;
+            m_state = BUTPRESS;
          }
          break;
       case START:
          if (up && down && left && right) { //reset
-            m_state = RESET;
+            m_state = WAIT;
          }
          if (gameStatus == 1) {
             m_state = END;
@@ -67,7 +67,7 @@ void menu_tick() {
          break;
       case END:
          if (up && down && left && right) { //reset
-            m_state = RESET;
+            m_state = WAIT;
          }
          if (gameStatus == 1) {
             m_state = END;
@@ -75,9 +75,6 @@ void menu_tick() {
          else {
             m_state = WAIT;
          }
-         break;
-      case RESET:
-         m_state = WAIT;
          break;
       default:
          m_state = WAIT;
@@ -94,8 +91,6 @@ void menu_tick() {
          break;
       case END:
          displayHighScore();
-         break;
-      case RESET:
          break;
       default:
          break;
@@ -130,10 +125,10 @@ void startGame() { //starting message
    LCD_createChar(7,p6);
    LCD_Cursor(24);
    LCD_WriteData(0x07);
-   EEPROM_write(0,5);
-   num = EEPROM_read(0);
-   LCD_Cursor(26);
-   LCD_WriteData(num + '0');
+   //EEPROM_write(0,5);
+   //num = EEPROM_read(0);
+   //LCD_Cursor(26);
+   //LCD_WriteData(num + '0');
 }
 
 void displayScore() {
@@ -148,13 +143,13 @@ void displayHighScore() {
    LCD_DisplayString(1, "highscore: ");
    LCD_Cursor(11);
    highScore = EEPROM_read(20);
-   if (score > highScore) {
+   /*if (score > highScore) {
      EEPROM_write(20,score);
    }
    else {
      highScore = EEPROM_read(20);
    }
-   LCD_WriteData(highScore + '0');
+   LCD_WriteData(highScore + '0');*/
 }
 
 //enum LED_STATES = { WAITBUT,RELBUT, INIT, 1, 2, 3, 4, FIN };
@@ -174,7 +169,7 @@ void led_tick() {
             state = INIT;
          }
          else {
-            state = WAITBUT;
+            state = RELBUT;
          }
          break;
       case INIT:
@@ -220,7 +215,7 @@ void led_tick() {
          break;
       case FIN:
          if (gameStatus == 0) {
-            state = INIT;
+            state = WAITBUT;
          }
          else {
             state = FIN;
@@ -263,8 +258,8 @@ void led_tick() {
       case FOUR: //right
          PORTA = Rows[6] | Rows[7];
          PORTC = Cols[0] & Cols[1] & Cols[2] & Cols[3] & Cols[4] & Cols[5] & Cols[6] & Cols[7];
-		 counter++;
-		 _delay_ms(1000);
+         counter++;
+         _delay_ms(1000);
          break;
       case FIN:
          displayHighScore();
